@@ -3,10 +3,12 @@
 # by purcaro@gmail.com
 
 import subprocess, sys, os, argparse, re
-from scripts.utils import Utils
 from collections import namedtuple
 import getpass, socket
 import shutil
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../metadata/utils'))
+from utils import Utils
 
 BuildPaths = namedtuple("BuildPaths", 'url build_dir build_sub_dir local_dir')
 
@@ -63,16 +65,8 @@ class Paths():
         return BuildPaths(url, build_dir, build_sub_dir, local_dir)
 
     def __jsoncpp(self):
-        url = "git@github.com:open-source-parsers/jsoncpp.git"
-        name = "jsoncpp"
-        build_dir = os.path.join(self.ext_build, name)
-        if os.path.exists(build_dir):
-            shutil.rmtree(build_dir)
-        fn = os.path.basename(url)
-        fn_noex = fn.replace(".git", "")
-        build_sub_dir = os.path.join(build_dir, fn_noex)
-        local_dir = os.path.join(self.install_dir, name)
-        return BuildPaths(url, build_dir, build_sub_dir, local_dir)
+        url = "https://github.com/open-source-parsers/jsoncpp/archive/1.7.4.tar.gz"
+        return self.__package_dirs(url, "jsoncpp", addPrefix = True)
 
     def __cppitertools(self):
         url = 'git@github.com:ryanhaining/cppitertools.git'
@@ -84,13 +78,12 @@ class Paths():
         return self.__package_dirs(url, "R-devel")
 
     def __boost(self):
-        url = "http://downloads.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz"
-        url = "http://downloads.sourceforge.net/project/boost/boost/1.57.0/boost_1_57_0.tar.gz"
+        url = "http://downloads.sourceforge.net/project/boost/boost/1.61.0/boost_1_61_0.tar.gz"
         return self.__package_dirs(url, "boost")
 
     def __armadillo(self):
-        url = "http://freefr.dl.sourceforge.net/project/arma/armadillo-5.600.2.tar.gz"
-        url = "http://freefr.dl.sourceforge.net/project/arma/armadillo-6.200.3.tar.gz"
+        url = "http://iweb.dl.sourceforge.net/project/arma/armadillo-6.500.5.tar.gz"
+        url = "http://pilotfiber.dl.sourceforge.net/project/arma/armadillo-7.300.1.tar.xz"
         return self.__package_dirs(url, "armadillo")
 
     def __mlpack(self):
@@ -98,7 +91,7 @@ class Paths():
         return self.__package_dirs(url, "mlpack")
 
     def __liblinear(self):
-        url = "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/multicore-liblinear/liblinear-multicore-2.1-2.zip"
+        url = "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/multicore-liblinear/liblinear-multicore-2.11-1.zip"
         return self.__package_dirs(url, "liblinear")
 
     def __cppcms(self):
@@ -117,10 +110,12 @@ class Paths():
         url = "http://vikas.sindhwani.org/svmlin-v1.0.tar.gz"
         return self.__package_dirs(url, "svmlin")
 
-    def __package_dirs(self, url, name):
+    def __package_dirs(self, url, name, addPrefix = False):
         build_dir = os.path.join(self.ext_build, name)
         fn = os.path.basename(url)
-        fn_noex = fn.replace(".tar.gz", "").replace(".tar.bz2", "").replace(".zip", "")
+        fn_noex = fn.replace(".tar.gz", "").replace(".tar.bz2", "").replace(".zip", "").replace(".tar.xz", "")
+        if addPrefix:
+            fn_noex = name + '-' + fn_noex
         build_sub_dir = os.path.join(build_dir, fn_noex)
         local_dir = os.path.join(self.install_dir, name)
         return BuildPaths(url, build_dir, build_sub_dir, local_dir)
@@ -162,7 +157,7 @@ class Setup:
         self.__setup("zi_lib", self.zi_lib)
         self.__setup("cppitertools", self.cppitertools)
         self.__setup("jsoncpp", self.jsoncpp)
-        #self.__setup("liblinear", self.liblinear)
+        self.__setup("liblinear", self.liblinear)
         #self.__setup("bamtools", self.bamtools)
         self.__setup("armadillo", self.armadillo)
         #self.__setup("cppcms", self.cppcms)
@@ -199,10 +194,11 @@ class Setup:
         try:
             Utils.run_in_dir(cmd, i.build_sub_dir)
         except:
-            Utils.rm_rf(i.local_dir)
+            print("running:", cmd)
             sys.exit(1)
 
     def boost(self):
+        print("boost requires bzip2 libraries, else it will fail during compilation...")
         i = self.__path("boost")
         if isMac():
           cmd = """echo "using darwin : 3.2 : /usr/local/bin/g++-3.2 ;  " >> tools/build/v2/user-config.jam && ./bootstrap.sh --prefix={local_dir} && ./b2 -d 2 toolset=darwin-4.9 -j {num_cores} install && install_name_tool -change libboost_system.dylib {local_dir}/lib/libboost_system.dylib {local_dir}/lib/libboost_thread.dylib && install_name_tool -change libboost_system.dylib {local_dir}/lib/libboost_system.dylib {local_dir}/lib/libboost_filesystem.dylib""".format(local_dir=shellquote(i.local_dir).replace(' ', '\ '), num_cores=self.num_cores())
@@ -248,12 +244,9 @@ class Setup:
 
     def jsoncpp(self):
         i = self.__path('jsoncpp')
-        cmd = "git clone {url} {d}".format(url=i.url, d=i.build_dir)
-        Utils.run(cmd)
-        i = self.__path('jsoncpp')
-        cmd = "mkdir -p build && cd build && CC=gcc-4.9 CXX=g++-4.9 cmake -DCMAKE_INSTALL_PREFIX:PATH={local_dir} .. && make -j {num_cores} install".format(
+        cmd = "mkdir -p build && cd build && CC=gcc CXX=g++ cmake -DCMAKE_INSTALL_PREFIX:PATH={local_dir} .. && make -j {num_cores} install".format(
             local_dir=shellquote(i.local_dir), num_cores=self.num_cores())
-        Utils.run_in_dir(cmd, i.build_dir)
+        self.__build(i, cmd)
 
     def cppcms(self):
         i = self.__path('cppcms')
@@ -272,8 +265,8 @@ class Setup:
 
     def liblinear(self):
         i = self.__path('liblinear')
+        # patch -p1 -i ../../../liblinear-2.1.2-patch.diff &&
         cmd = """
-patch -p1 -i ../../../liblinear-2.1.2-patch.diff &&
 make &&
 mkdir -p {local_dir} &&
 cp predict train {local_dir} &&
@@ -344,9 +337,6 @@ cp -a * {local_dir}/
 
     def cppitertools(self):
         self.__git(self.__path('cppitertools'))
-        i = self.__path('cppitertools')
-        cmd = "cd {d} && git checkout d4f79321842dd584f799a7d51d3e066a2cdb7cac".format(d=shellquote(i.local_dir))
-        Utils.run(cmd)
 
     def ubuntu(self):
         pkgs = """libbz2-dev python2.7-dev cmake libpcre3-dev zlib1g-dev libgcrypt11-dev libicu-dev
