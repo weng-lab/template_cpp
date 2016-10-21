@@ -25,8 +25,8 @@ class Paths():
         self.ext_tars = os.path.join(self.base_dir, "tarballs")
         self.ext_build = os.path.join(self.base_dir, "build")
         self.install_dir = os.path.join(self.base_dir, "local")
-        Utils.mkdir(self.ext_tars)
-        Utils.mkdir(self.ext_build)
+        Utils.mkdir_p(self.ext_tars)
+        Utils.mkdir_p(self.ext_build)
         self.paths = {}
         self.paths["R-devel"] = self.__Rdevel()
         self.paths["armadillo"] = self.__armadillo()
