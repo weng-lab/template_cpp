@@ -25,8 +25,8 @@ class Paths():
         self.ext_tars = os.path.join(self.base_dir, "tarballs")
         self.ext_build = os.path.join(self.base_dir, "build")
         self.install_dir = os.path.join(self.base_dir, "local")
-        Utils.mkdir_p(self.ext_tars)
-        Utils.mkdir_p(self.ext_build)
+        Utils.mkdir(self.ext_tars)
+        Utils.mkdir(self.ext_build)
         self.paths = {}
         self.paths["R-devel"] = self.__Rdevel()
         self.paths["armadillo"] = self.__armadillo()
@@ -65,7 +65,7 @@ class Paths():
         return BuildPaths(url, build_dir, build_sub_dir, local_dir)
 
     def __jsoncpp(self):
-        url = "https://github.com/open-source-parsers/jsoncpp/archive/1.7.4.tar.gz"
+        url = "https://github.com/open-source-parsers/jsoncpp/archive/1.8.0.tar.gz"
         return self.__package_dirs(url, "jsoncpp", addPrefix = True)
 
     def __cppitertools(self):
@@ -78,12 +78,11 @@ class Paths():
         return self.__package_dirs(url, "R-devel")
 
     def __boost(self):
-        url = "http://downloads.sourceforge.net/project/boost/boost/1.61.0/boost_1_61_0.tar.gz"
+        url = "http://downloads.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz"
         return self.__package_dirs(url, "boost")
 
     def __armadillo(self):
-        url = "http://iweb.dl.sourceforge.net/project/arma/armadillo-6.500.5.tar.gz"
-        url = "http://pilotfiber.dl.sourceforge.net/project/arma/armadillo-7.300.1.tar.xz"
+        url = "http://pilotfiber.dl.sourceforge.net/project/arma/armadillo-7.800.2.tar.xz"
         return self.__package_dirs(url, "armadillo")
 
     def __mlpack(self):
@@ -91,7 +90,7 @@ class Paths():
         return self.__package_dirs(url, "mlpack")
 
     def __liblinear(self):
-        url = "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/multicore-liblinear/liblinear-multicore-2.11-1.zip"
+        url = "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/multicore-liblinear/liblinear-multicore-2.11-2.zip"
         return self.__package_dirs(url, "liblinear")
 
     def __cppcms(self):
@@ -157,7 +156,7 @@ class Setup:
         self.__setup("zi_lib", self.zi_lib)
         self.__setup("cppitertools", self.cppitertools)
         self.__setup("jsoncpp", self.jsoncpp)
-        self.__setup("liblinear", self.liblinear)
+        #self.__setup("liblinear", self.liblinear)
         #self.__setup("bamtools", self.bamtools)
         self.__setup("armadillo", self.armadillo)
         #self.__setup("cppcms", self.cppcms)
