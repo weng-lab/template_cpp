@@ -47,7 +47,7 @@ LD_FLAGS += -Wl,-rpath,$(LOCAL_PATH)/armadillo/lib -L$(LOCAL_PATH)/armadillo/lib
 LD_FLAGS += -lcurl
 
 #liblinear
-LD_FLAGS += -Wl,-rpath,$(LOCAL_PATH)/liblinear -L$(LOCAL_PATH)/liblinear  -llinear
+# LD_FLAGS += -Wl,-rpath,$(LOCAL_PATH)/liblinear -L$(LOCAL_PATH)/liblinear  -llinear
 
 #bamtools
 #LD_FLAGS += -Wl,-rpath,$(LOCAL_PATH)/bamtools/lib/bamtools -L$(LOCAL_PATH)/bamtools/lib/bamtools\
