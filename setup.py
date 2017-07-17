@@ -82,8 +82,7 @@ class Paths():
         return self.__package_dirs(url, "boost")
 
     def __armadillo(self):
-        url = "http://iweb.dl.sourceforge.net/project/arma/armadillo-6.500.5.tar.gz"
-        url = "http://pilotfiber.dl.sourceforge.net/project/arma/armadillo-7.300.1.tar.xz"
+        url = "http://pilotfiber.dl.sourceforge.net/project/arma/armadillo-7.950.1.tar.xz"        
         return self.__package_dirs(url, "armadillo")
 
     def __mlpack(self):
