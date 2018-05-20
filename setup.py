@@ -6,6 +6,7 @@ import subprocess, sys, os, argparse, re
 from collections import namedtuple
 import getpass, socket
 import shutil
+import urllib
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../metadata/utils'))
 from utils import Utils
@@ -48,7 +49,7 @@ class Paths():
         raise Exception(name + " not found in paths")
 
     def __zi_lib(self):
-        url = 'git@github.com:weng-lab/zi_lib.git'
+        url = 'https://github.com/zlateski/zi_lib' # 'git@github.com:weng-lab/zi_lib.git'
         local_dir = os.path.join(self.install_dir, "zi_lib")
         return BuildPaths(url, '', '', local_dir)
 
@@ -187,7 +188,8 @@ class Setup:
 
     def __build(self, i, cmd):
         print "\t getting file..."
-        fnp = Utils.get_file_if_size_diff(i.url, self.paths.ext_tars)
+        urllib.urlretrieve(i.url, os.path.join(self.paths.ext_tars, os.path.basename(i.url)))
+        fnp = os.path.join(self.paths.ext_tars, os.path.basename(i.url))
         Utils.clear_dir(i.build_dir)
         Utils.untar(fnp, i.build_dir)
         try:
@@ -235,7 +237,7 @@ class Setup:
     def bamtools(self):
         i = self.__path('bamtools')
         cmd = "git clone {url} {d}".format(url=i.url, d=i.build_dir)
-        Utils.run(cmd)
+        os.system(cmd)
         i = self.__path('bamtools')
         cmd = "mkdir -p build && cd build && CC=gcc-4.9 CXX=g++-4.9 cmake -DCMAKE_INSTALL_PREFIX:PATH={local_dir} .. && make -j {num_cores} install".format(
             local_dir=shellquote(i.local_dir), num_cores=self.num_cores())
@@ -329,7 +331,7 @@ cp -a * {local_dir}/
 
     def __git(self, i):
         cmd = "git clone {url} {d}".format(url=i.url, d=shellquote(i.local_dir))
-        Utils.run(cmd)
+        os.system(cmd)
 
     def zi_lib(self):
         self.__git(self.__path('zi_lib'))
